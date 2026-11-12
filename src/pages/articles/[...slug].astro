@@ -1,0 +1,46 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+import { CATEGORY_LABELS } from '../../consts';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('articles', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const fmt = (d: Date) =>
+  `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+<Base title={post.data.title} description={post.data.description}>
+  <article>
+    <header class="article-header">
+      <h1>{post.data.title}</h1>
+      <p class="meta">
+        <span>{fmt(post.data.date)}</span>
+        <span>·</span>
+        <span>{CATEGORY_LABELS[post.data.category]}</span>
+        {post.data.tags.length > 0 && <span>·</span>}
+        <span>{post.data.tags.join(' / ')}</span>
+      </p>
+    </header>
+
+    {toc.length > 2 && (
+      <nav class="chips" style="margin-bottom: 8px;">
+        {toc.map((h) => (
+          <a href={`#${h.slug}`}>{h.text}</a>
+        ))}
+      </nav>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</Base>

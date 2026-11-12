@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../consts';
+---
+
+<Base title="关于">
+  <section class="hero">
+    <h1>关于这个站</h1>
+    <p>这里是 {SITE.author} 的技术笔记归档。</p>
+  </section>
+  <div class="prose">
+    <p>
+      我在微信公众号写技术文章，但公众号的排版体系和检索能力都不适合做长期知识库。
+      这个小站用来做三件事：
+    </p>
+    <ul>
+      <li>把发出去的文章重新归档、结构化，方便自己回头查</li>
+      <li>给外部留一个可被搜索引擎索引、可被自由引用的地址</li>
+      <li>沉淀那些公众号里不好放的表格、公式、代码块和多图对比</li>
+    </ul>
+    <p>联系方式：在公众号「{SITE.author}」后台留言，或邮件 hi@maomaoxiang.com。</p>
+  </div>
+</Base>

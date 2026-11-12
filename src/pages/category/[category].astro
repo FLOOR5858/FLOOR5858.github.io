@@ -1,0 +1,40 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { CATEGORY_LABELS, CATEGORIES } from '../../consts';
+
+export async function getStaticPaths() {
+  return CATEGORIES.map((c) => ({
+    params: { category: c.key },
+    props: { label: c.label },
+  }));
+}
+
+const { category } = Astro.params;
+const { label } = Astro.props;
+
+const posts = (await getCollection('articles', ({ data }) => !data.draft && data.category === category)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const fmt = (d: Date) =>
+  `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+---
+
+<Base title={label} description={`${label} 分类下的全部技术文章`}>
+  <section class="hero" style="padding-bottom: 16px;">
+    <h1>{label}</h1>
+    <p>{posts.length} 篇文章</p>
+  </section>
+
+  <ul class="post-list">
+    {posts.map((post) => (
+      <li class="post-item">
+        <h2><a href={`/articles/${post.id}/`}>{post.data.title}</a></h2>
+        <p class="meta"><span>{fmt(post.data.date)}</span></p>
+        <p class="desc">{post.data.description}</p>
+      </li>
+    ))}
+    {posts.length === 0 && <li class="post-item"><p class="desc">暂无文章。</p></li>}
+  </ul>
+</Base>

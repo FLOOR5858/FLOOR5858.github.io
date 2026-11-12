@@ -1,0 +1,53 @@
+---
+import '../styles/global.css';
+import { SITE, CATEGORIES } from '../consts';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title, description = SITE.description } = Astro.props;
+const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/">{SITE.name.split('实验')[0]}<span>.</span></a>
+        <nav class="nav">
+          <a href="/">文章</a>
+          {CATEGORIES.map((c) => <a href={`/category/${c.key}/`}>{c.label}</a>)}
+          <a href="/rss.xml">RSS</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>© {new Date().getFullYear()} {SITE.author} · 保留所有权利</span>
+        <span>
+          部分文章首发于微信公众号，本站为完整归档 ·
+          <a href="/rss.xml">RSS 订阅</a>
+        </span>
+      </div>
+    </footer>
+  </body>
+</html>
