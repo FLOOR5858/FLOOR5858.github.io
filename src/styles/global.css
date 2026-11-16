@@ -63,11 +63,15 @@ a:hover { color: var(--accent); }
   height: 60px;
 }
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
   font-size: 15px;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
-.brand span { color: var(--accent); }
+.brand svg { flex: none; }
 .nav { display: flex; gap: 18px; font-size: 14px; color: var(--fg-muted); }
 .nav a:hover { color: var(--fg); }
 
