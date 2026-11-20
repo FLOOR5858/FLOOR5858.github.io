@@ -72,8 +72,27 @@ a:hover { color: var(--accent); }
   white-space: nowrap;
 }
 .brand svg { flex: none; }
-.nav { display: flex; gap: 18px; font-size: 14px; color: var(--fg-muted); }
+.nav { display: flex; align-items: center; gap: 18px; font-size: 14px; color: var(--fg-muted); }
 .nav a:hover { color: var(--fg); }
+
+/* ---------- language switch ---------- */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 14px;
+  border-left: 1px solid var(--border);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.lang-switch a { color: var(--fg-muted); }
+.lang-switch a.active { color: var(--fg); font-weight: 600; }
+.lang-sep { color: var(--border); }
+
+@media (max-width: 640px) {
+  .nav { gap: 12px; font-size: 13px; }
+  .lang-switch { padding-left: 10px; }
+}
 
 /* ---------- hero ---------- */
 .hero { padding: 64px 0 40px; }

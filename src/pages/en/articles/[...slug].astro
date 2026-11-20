@@ -1,0 +1,69 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { render } from 'astro:content';
+import {
+  CATEGORY_LABELS,
+  langFromPath,
+  formatDate,
+} from '../../../i18n';
+import {
+  getPostFamilies,
+  postForLang,
+  hasTranslation,
+  type PostFamily,
+} from '../../../lib/posts';
+
+interface Props {
+  fam: PostFamily;
+}
+
+export async function getStaticPaths() {
+  const families = await getPostFamilies();
+  const paths: { params: { slug: string }; props: { fam: PostFamily } }[] = [];
+  for (const fam of families) {
+    paths.push({ params: { slug: fam.key }, props: { fam } });
+  }
+  return paths;
+}
+
+const { fam } = Astro.props;
+const lang = langFromPath(Astro.url.pathname);
+const post = postForLang(fam, lang);
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const translated = hasTranslation(fam, lang);
+---
+
+<Base title={post.data.title} description={post.data.description} lang={lang}>
+  <article>
+    <header class="article-header">
+      <h1>{post.data.title}</h1>
+      <p class="meta">
+        <span>{formatDate(post.data.date, lang)}</span>
+        <span>·</span>
+        <span>{CATEGORY_LABELS[lang][post.data.category]}</span>
+        {post.data.tags.length > 0 && <span>·</span>}
+        <span>{post.data.tags.join(' / ')}</span>
+      </p>
+      {!translated && (
+        <p class="lang-note">
+          {lang === 'en'
+            ? 'This article is available in Chinese only.'
+            : '本文暂无英文版。'}
+        </p>
+      )}
+    </header>
+
+    {toc.length > 2 && (
+      <nav class="chips" style="margin-bottom: 8px;">
+        {toc.map((h) => (
+          <a href={`#${h.slug}`}>{h.text}</a>
+        ))}
+      </nav>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</Base>

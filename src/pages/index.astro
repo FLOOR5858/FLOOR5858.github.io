@@ -1,39 +1,46 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getCollection } from 'astro:content';
-import { SITE, CATEGORIES, CATEGORY_LABELS } from '../consts';
+import {
+  t,
+  CATEGORIES,
+  CATEGORY_LABELS,
+  langFromPath,
+  alternatePath,
+  formatDate,
+} from '../i18n';
+import { getPostFamilies, postForLang, postUrl, familyCategory } from '../lib/posts';
 
-const posts = (await getCollection('articles', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
-
-const fmt = (d: Date) =>
-  `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+const lang = langFromPath(Astro.url.pathname);
+const d = t(lang);
+const families = await getPostFamilies();
 ---
 
-<Base>
+<Base lang={lang}>
   <section class="hero">
-    <h1>{SITE.tagline}</h1>
-    <p>{SITE.description}</p>
+    <h1>{d.tagline}</h1>
+    <p>{d.description}</p>
     <ul class="chips">
-      {CATEGORIES.map((c) => (
-        <li><a href={`/category/${c.key}/`}>{c.label}</a></li>
+      {CATEGORIES[lang].map((c) => (
+        <li><a href={alternatePath(`/category/${c.key}/`, lang)}>{c.label}</a></li>
       ))}
     </ul>
   </section>
 
-  <div class="section-title">最新文章</div>
+  <div class="section-title">{d.latestArticles}</div>
   <ul class="post-list">
-    {posts.map((post) => (
-      <li class="post-item">
-        <h2><a href={`/articles/${post.id}/`}>{post.data.title}</a></h2>
-        <p class="meta">
-          <span>{fmt(post.data.date)}</span>
-          <span>·</span>
-          <span>{CATEGORY_LABELS[post.data.category]}</span>
-        </p>
-        <p class="desc">{post.data.description}</p>
-      </li>
-    ))}
+    {families.map((fam) => {
+      const post = postForLang(fam, lang);
+      return (
+        <li class="post-item">
+          <h2><a href={postUrl(fam, lang)}>{post.data.title}</a></h2>
+          <p class="meta">
+            <span>{formatDate(post.data.date, lang)}</span>
+            <span>·</span>
+            <span>{CATEGORY_LABELS[lang][familyCategory(fam)]}</span>
+          </p>
+          <p class="desc">{post.data.description}</p>
+        </li>
+      );
+    })}
   </ul>
 </Base>

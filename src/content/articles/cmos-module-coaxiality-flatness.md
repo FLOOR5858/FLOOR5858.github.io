@@ -4,6 +4,8 @@ description: '批量对焦反复跑焦的三个坑——板材 Tg、导向螺纹
 date: 2026-11-16
 category: hardware
 tags: ['摄像头模组', 'AA工艺', 'PCB', 'IMX678']
+lang: zh-CN
+translationKey: cmos-module-coaxiality-flatness
 ---
 
 > 作者：LLY · 首发于微信公众号

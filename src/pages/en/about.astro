@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import { t, CONTACT_EMAIL, langFromPath } from '../../i18n';
+
+const lang = langFromPath(Astro.url.pathname);
+const d = t(lang);
+---
+
+<Base title={d.aboutTitle} description={d.description} lang={lang}>
+  <section class="hero">
+    <h1>{d.aboutHeading}</h1>
+    <p>{d.aboutIntro}</p>
+  </section>
+  <div class="prose">
+    <p>{d.aboutP1}</p>
+    <ul>
+      {d.aboutList.map((item) => <li>{item}</li>)}
+    </ul>
+    <p>
+      {d.aboutContact}{' '}
+      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>{lang === 'zh-CN' ? '。' : '.'}
+    </p>
+  </div>
+</Base>

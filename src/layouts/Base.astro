@@ -1,46 +1,85 @@
 ---
 import '../styles/global.css';
-import { SITE, CATEGORIES } from '../consts';
+import {
+  t,
+  CATEGORIES,
+  LOCALES,
+  LOCALE_NAMES,
+  CONTACT_EMAIL,
+  langFromPath,
+  alternatePath,
+  type Lang,
+} from '../i18n';
 
 interface Props {
   title?: string;
   description?: string;
+  lang?: Lang;
 }
 
-const { title, description = SITE.description } = Astro.props;
-const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
+const {
+  title,
+  description,
+  lang = langFromPath(Astro.url.pathname),
+} = Astro.props;
+
+const d = t(lang);
+const siteTitle = d.siteName;
+const pageTitle = title ? `${title} | ${siteTitle}` : `${siteTitle} — ${d.tagline}`;
+const desc = description ?? d.description;
+
+const pathname = Astro.url.pathname;
+const categories = CATEGORIES[lang];
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={desc} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
-    <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+    <link rel="canonical" href={new URL(pathname, Astro.site)} />
+    {LOCALES.map((l) => (
+      <link rel="alternate" hreflang={l} href={new URL(alternatePath(pathname, l), Astro.site)} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={new URL(alternatePath(pathname, 'zh-CN'), Astro.site)} />
+    <link rel="alternate" type="application/rss+xml" title={siteTitle} href="/rss.xml" />
     <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={desc} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={lang === 'zh-CN' ? 'zh_CN' : 'en_US'} />
   </head>
   <body>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href="/">
+        <a class="brand" href={alternatePath('/', lang)}>
           <svg viewBox="45 0 480 400" width="30" height="25" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M132 105 L272 20 L392 20 L498 126 L505 345 L430 345 L430 238 L348 238 L348 345 L240 345 L240 260 L132 260 Z"/>
             <path d="M132 165 C160 212, 195 220, 212 194" stroke-width="22"/>
             <path d="M132 260 C84 268, 64 308, 72 344 L72 376 L138 376"/>
             <circle cx="206" cy="108" r="16" fill="currentColor" stroke="none"/>
           </svg>
-          {SITE.name}
+          {siteTitle}
         </a>
         <nav class="nav">
-          <a href="/">文章</a>
-          {CATEGORIES.map((c) => <a href={`/category/${c.key}/`}>{c.label}</a>)}
-          <a href="/rss.xml">RSS</a>
+          <a href={alternatePath('/', lang)}>{d.navArticles}</a>
+          {categories.map((c) => <a href={alternatePath(`/category/${c.key}/`, lang)}>{c.label}</a>)}
+          <a href="/rss.xml">{d.navRss}</a>
+          <span class="lang-switch" aria-label="Language">
+            {LOCALES.map((l, i) => (
+              <>
+                {i > 0 && <span class="lang-sep">/</span>}
+                <a
+                  href={alternatePath(pathname, l)}
+                  hreflang={l}
+                  class={l === lang ? 'active' : ''}
+                  aria-current={l === lang ? 'true' : undefined}
+                >{LOCALE_NAMES[l]}</a>
+              </>
+            ))}
+          </span>
         </nav>
       </div>
     </header>
@@ -51,10 +90,12 @@ const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} — ${SITE.t
 
     <footer class="site-footer">
       <div class="wrap">
-        <span>© {new Date().getFullYear()} {SITE.author} · 保留所有权利</span>
+        <span>© {new Date().getFullYear()} {lang === 'zh-CN' ? '毛毛象' : 'Maomaoxiang'} · {d.footerRights}</span>
         <span>
-          部分文章首发于微信公众号，本站为完整归档 ·
-          <a href="/rss.xml">RSS 订阅</a>
+          {d.footerNote}
+          <a href="/rss.xml">{d.footerRss}</a>
+          {' · '}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
         </span>
       </div>
     </footer>
