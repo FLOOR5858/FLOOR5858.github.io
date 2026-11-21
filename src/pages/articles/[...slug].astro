@@ -11,23 +11,26 @@ import {
   getPostFamilies,
   postForLang,
   hasTranslation,
+  postUrl,
+  relatedFamilies,
   type PostFamily,
 } from '../../lib/posts';
 
 interface Props {
   fam: PostFamily;
+  related: PostFamily[];
 }
 
 export async function getStaticPaths() {
   const families = await getPostFamilies();
-  const paths: { params: { slug: string }; props: { fam: PostFamily } }[] = [];
+  const paths: { params: { slug: string }; props: { fam: PostFamily; related: PostFamily[] } }[] = [];
   for (const fam of families) {
-    paths.push({ params: { slug: fam.key }, props: { fam } });
+    paths.push({ params: { slug: fam.key }, props: { fam, related: relatedFamilies(families, fam) } });
   }
   return paths;
 }
 
-const { fam } = Astro.props;
+const { fam, related } = Astro.props;
 const lang = langFromPath(Astro.url.pathname);
 const post = postForLang(fam, lang);
 const { Content, headings } = await render(post);
@@ -83,5 +86,22 @@ const articleSchema = {
     <div class="prose">
       <Content />
     </div>
+
+    {related.length > 0 && (
+      <section style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border, #e5e5e5);">
+        <h2 style="font-size:15px;font-weight:600;margin:0 0 14px;">{lang === 'en' ? 'Related posts' : '相关文章'}</h2>
+        <ul style="list-style:none;padding:0;margin:0;">
+          {related.map((r) => {
+            const rp = postForLang(r, lang);
+            return (
+              <li style="margin-bottom:10px;">
+                <a href={postUrl(r, lang)} style="text-decoration:none;">{rp.data.title}</a>
+                <span class="meta" style="margin-left:8px;">{formatDate(rp.data.date, lang)}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    )}
   </article>
 </Base>

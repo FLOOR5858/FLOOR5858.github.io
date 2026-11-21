@@ -52,3 +52,33 @@ export function postUrl(fam: PostFamily, lang: Lang): string {
 export function familyCategory(fam: PostFamily): string {
   return (fam.zh ?? fam.en)!.data.category;
 }
+
+/**
+ * 挑相关文章：标签重合度权重最高，同分类次之，最后按时间新到旧兜底。
+ * 目的是给每篇文章加站内互链——帮助搜索引擎发现更多页面，也让人多读一篇。
+ */
+export function relatedFamilies(all: PostFamily[], current: PostFamily, n = 3): PostFamily[] {
+  const cur = current.zh ?? current.en!;
+  const curTags = new Set(cur.data.tags);
+
+  const scored = all
+    .filter((f) => f.key !== current.key)
+    .map((f) => {
+      const p = f.zh ?? f.en!;
+      const tagHits = p.data.tags.filter((t) => curTags.has(t)).length;
+      const sameCat = p.data.category === cur.data.category ? 1 : 0;
+      return { f, score: tagHits * 2 + sameCat };
+    })
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score || b.f.latest.valueOf() - a.f.latest.valueOf());
+
+  if (scored.length < n) {
+    const picked = new Set([current.key, ...scored.map((s) => s.f.key)]);
+    for (const f of all) {
+      if (scored.length >= n) break;
+      if (picked.has(f.key)) continue;
+      scored.push({ f, score: 0 });
+    }
+  }
+  return scored.slice(0, n).map((s) => s.f);
+}
