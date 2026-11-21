@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# 站点地图
+Sitemap: https://maomaoxiang.com/sitemap-index.xml
+
+# 百度蜘蛛单独放行
+User-agent: Baiduspider
+Allow: /
+
+# Google
+User-agent: Googlebot
+Allow: /

@@ -33,9 +33,26 @@ const post = postForLang(fam, lang);
 const { Content, headings } = await render(post);
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 const translated = hasTranslation(fam, lang);
+
+// 结构化数据：告诉搜索引擎这是一篇技术文章，争取富摘要
+const pageUrl = new URL(Astro.url.pathname, Astro.site).href;
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.date.toISOString(),
+  dateModified: post.data.date.toISOString(),
+  inLanguage: lang === 'en' ? 'en' : 'zh-CN',
+  keywords: post.data.tags.join(', '),
+  mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
+  author: { '@type': 'Person', name: lang === 'en' ? 'Maomaoxiang' : '毛毛象' },
+  publisher: { '@type': 'Organization', name: lang === 'en' ? 'Maomaoxiang Lab' : '毛毛象实验室' },
+};
 ---
 
 <Base title={post.data.title} description={post.data.description} lang={lang}>
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
   <article>
     <header class="article-header">
       <h1>{post.data.title}</h1>
